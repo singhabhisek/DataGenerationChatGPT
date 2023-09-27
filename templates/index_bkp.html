@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webpage with Python and ChatGPT</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Mukta' rel='stylesheet'>
+    <style>
+    /* Add your CSS styles here */
+
+     /* Center the spinner */
+    .modal-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    /* Optional: Adjust spinner size and color */
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: #007BFF;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Mukta';
+      font-size: 16px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background-image:linear-gradient(45deg, #10011b, #48028f);
+<!--      background-color: #f0f0f0;-->
+    }
+
+    .header-logo {
+      max-height: 50px;
+    }
+
+    /* Style the sidebar - fixed full height */
+    .sidebar {
+      height: calc(100vh - 50px);
+      width: 160px;
+      position: fixed;
+      z-index: 1;
+      top: 75px;
+      left: 0;
+      background-color: #f0f0f0;
+      overflow-x: hidden;
+      padding-top: 16px;
+    }
+
+    /* Style sidebar links */
+    .sidebar a {
+      padding: 6px 8px 6px 16px;
+      text-decoration: none;
+      font-size: 15px;
+      color: black;
+      display: block;
+    }
+
+    /* Style links on mouse-over */
+    .sidebar a:hover {
+      color: darkgray;
+    }
+
+    .hidden-span {
+      display: none;
+    }
+
+    textarea {
+      resize: none;
+    }
+    a, a:hover, a:active, a:visited { color: black; text-decoration: none;}
+
+
+    .body-content {
+      margin-left: 15%; /* Sidebar width */
+      padding: 20px;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background-image: linear-gradient(74deg, #ffffff, #8c8a8a);
+      position: absolute;
+      width: 100%;
+      bottom: 0;
+    }
+    .welcome{
+    color: white;
+    }
+    h1 {
+        font-size: 40px;
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(to right, #f32170,
+                #ff6b08, #cf23cf, #eedd44);
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        }
+
+	 /* Add new styles for error modal */
+  #errorModal .modal-header {
+    border-bottom: none;
+  }
+
+  #errorModal .modal-body {
+    text-align: center;
+  }
+
+  #errorModal .modal-body p {
+    font-size: 14px;
+    /*font-weight: bold;*/
+    color: #FF0000; /* Red color for critical error */
+  }
+
+
+    </style>
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <!-- Logo and title -->
+    <div>
+        <img src="static/logo.png" style="width: 65px;height: 50px;padding-left: 10px;" alt="Logo" class="logo">
+    </div>
+    <div>
+        <h1> Data Simulation Program </h1>
+    </div>
+    <div class="welcome">
+        Welcome, <span id="welcomeLabel"></span><br>
+        <span id="dateLabel"></span>
+    </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <a href="#home"><i class="fa fa-fw fa-home"></i> Home</a>
+    <a href="templates/index.html"><i class="fa fa-fw fa-wrench"></i> Generate Data</a>
+    <a href="#generate-query"><i class="fa fa-fw fa-user"></i> Generate Query</a>
+    <a href="#contact"><i class="fa fa-fw fa-envelope"></i> Contact</a>
+</div>
+
+<!-- Body content -->
+<div class="body-content">
+    <!-- Other content... -->
+
+    <div class="row">
+        <div class="col text-center">
+            <h1></h1>
+            <p><i class="fas fa-rocket"></i> Let's do something amazing!
+                Welcome to the Data Generation Program! If you're seeking efficient and effective ways to generate,
+                manipulate, and manage data, you're in the right place. Whether you're a seasoned data professional or
+                just starting out, this tool is here to empower you with the knowledge and resources to streamline your
+                data workflows and make informed decisions. Let's dive into the world of data generation and unlock its
+                potential for your projects.
+
+            </p>
+        </div>
+    </div>
+
+    <br/>
+    <hr/>
+
+    <!-- Submit button and output area -->
+    <div class="row">
+        <div class="col">
+            <!-- Input textarea -->
+            <div class="form-group">
+                <label for="inputTextArea">Input:</label>
+                <textarea class="form-control" id="inputTextArea" rows="10"></textarea>
+            </div>
+            <div class="text-center">
+                <button class="btn btn-primary btn-sm" onclick="checkAndExecute()">Submit</button>
+            </div>
+        </div>
+        <div class="col">
+            <!-- Output textarea -->
+            <div class="form-group">
+                <label for="outputTextArea">Output:</label>
+                <textarea class="form-control" id="outputTextArea" rows="10" readonly></textarea>
+            </div>
+            <div class="text-center mt-3">
+                <span class="hidden-span btn btn-outline-primary btn-sm" id="downloadLink"></span>
+                <span class="hidden-span btn btn-outline-success btn-sm" id="downloadProgramLink"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Wait modal -->
+<div id="waitModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="waitModalLabel" aria-hidden="true"
+     data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">Please wait...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true"
+     data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2em; color: red;"></i> Error
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="errorModalBody">
+                <!-- Error message will be displayed here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    &copy; 2023 NFT CoE GenAI Hackathon
+</div>
+
+<!-- Scripts and JavaScript -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Your JavaScript code...
+
+
+    function checkIfTextareaBlank() {
+      const textareaContent = document.getElementById('inputTextArea').value;
+      return textareaContent.trim() === '';
+    }
+
+    function checkAndExecute() {
+	  document.getElementById('outputTextArea').value = "";
+
+      if (checkIfTextareaBlank()) {
+        alert('Please provide input criteria.');
+      } else {
+        processInput();
+      }
+    }
+
+
+
+	function processInput() {
+	  var inputText = document.getElementById('inputTextArea').value;
+	  document.getElementById('outputTextArea').value = "";
+	  document.getElementById('downloadLink').classList.remove('hidden-span');
+      document.getElementById('downloadProgramLink').classList.remove('hidden-span');
+
+	  // Show the wait modal
+	  $('#waitModal').modal('show');
+
+	  var xhr = new XMLHttpRequest();
+	  xhr.open('POST', 'http://127.0.0.1:5000/datarequest', true);  // Replace with your API endpoint
+	  xhr.setRequestHeader('Content-Type', 'application/json');
+	  xhr.setRequestHeader('Request-From', 'web');  // Replace with your token
+
+	  xhr.onreadystatechange = function () {
+
+		if (xhr.readyState === XMLHttpRequest.DONE) {
+		  // Hide the wait modal
+		  $('#waitModal').modal('hide');
+
+		  if (xhr.status === 200) {
+			var response = JSON.parse(xhr.responseText);
+			document.getElementById('outputTextArea').value = response.response;
+
+			// Enable export button and set download link
+			document.getElementById('downloadLink').disabled = false;
+			document.getElementById('downloadLink').innerHTML = '<a href="http://127.0.0.1:5000/static/download/' + response.filename + '">Download Output</a>';
+			document.getElementById('downloadProgramLink').innerHTML = '<a target="_blank" href="http://127.0.0.1:5000/download/' + response.scriptname + '">Download Program</a>';
+            document.getElementById('downloadLink').classList.remove('hidden-span');
+            document.getElementById('downloadProgramLink').classList.remove('hidden-span');
+
+		  }
+		  else if (xhr.status === 500) {
+			$('#waitModal').modal('hide');
+			 $('.modal-backdrop').remove();
+			 document.getElementById('outputTextArea').value = "";
+	  document.getElementById('downloadLink').classList.remove('hidden-span');
+      document.getElementById('downloadProgramLink').classList.remove('hidden-span');
+			showErrorPopup("Unknown Error occurred. Please retry", 500);
+
+
+		  }
+		  else {
+
+			$('#waitModal').modal('hide');
+			document.getElementById('outputTextArea').value = "";
+	  document.getElementById('downloadLink').classList.remove('hidden-span');
+      document.getElementById('downloadProgramLink').classList.remove('hidden-span');
+			var errorResponse = JSON.parse(xhr.responseText);
+			alert(xhr.responseText);
+			alert(errorResponse.error);
+			showErrorPopup(errorResponse.error, errorResponse.status_code);
+		  }
+		}
+	  };
+
+	  xhr.send(JSON.stringify({ 'content': inputText }));
+	}
+
+    function callAPI() {
+        const inputText = document.getElementById('inputTextArea').value;
+
+        const apiUrl = 'http://127.0.0.1:5000/datarequest';
+
+        $('#loadingModal').modal('show');
+
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+				'Request-From': 'web'
+            },
+            body: JSON.stringify({ 'content': inputText })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+			//return response.text();
+            return response.json();
+        })
+        .then(data => {
+            // Display the response in the output textarea
+			alert(data.error)
+            document.getElementById('outputTextArea').value = data.response;
+			document.getElementById('downloadLink').innerHTML = '<a target="_blank" href="http://127.0.0.1:5000/download/' + data.filename + '">Download Output</a>';
+            document.getElementById('downloadProgramLink').innerHTML = '<a target="_blank" href="http://127.0.0.1:5000/download/' + data.scriptname + '">Download Program</a>';
+            document.getElementById('downloadLink').classList.remove('hidden-span');
+            document.getElementById('downloadProgramLink').classList.remove('hidden-span');
+
+            $('#loadingModal').modal('hide');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            $('#loadingModal').modal('hide');
+
+			showErrorPopup(data.error, data.status_code);
+
+            $('#errorModal').modal('show');
+        });
+    }
+
+
+   function generateRandomFileName(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        result += characters.charAt(randomIndex);
+    }
+
+    return result;
+}
+
+  function exportOutput() {
+      var outputText = document.getElementById('outputTextArea').value;
+
+      var blob = new Blob([outputText], { type: 'text/plain' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'output' + generateRandomFileName(4) +'.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+	// JavaScript to set welcome label and date
+    const welcomeLabel = document.getElementById('welcomeLabel');
+    const dateLabel = document.getElementById('dateLabel');
+
+    const currentDate = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+
+    welcomeLabel.textContent = 'User'; // Replace with actual username or welcome message
+    dateLabel.textContent = currentDate.toLocaleDateString(undefined, options);
+
+
+
+	function showErrorPopup(errorMessage, statusCode) {
+      var errorModalBody = document.getElementById('errorModalBody');
+      errorModalBody.innerHTML = '<p>Error ' + statusCode + ': ' + errorMessage + '</p>';
+
+      // Show the error modal
+      $('#errorModal').modal({ backdrop: 'static', keyboard: false });
+    }
+
+</script>
+</body>
+</html>

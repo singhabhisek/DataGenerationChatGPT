@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask Webpage</title>
+</head>
+<body>
+    <h1>Python Flask Webpage</h1>
+    <form action="/process" method="post">
+        <label for="input_text">Enter text:</label>
+        <input type="text" id="input_text" name="input_text"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <h2>Response:</h2>
+    <textarea id="response_text" rows="5" cols="50" readonly>{{ response }}</textarea>
+</body>
+</html>
