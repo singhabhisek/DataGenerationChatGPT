@@ -2,13 +2,19 @@ import os
 import subprocess
 import sys
 import openai
+import logging
 
 # Set the OpenAI API key
-openai.api_key = ''
+openai.api_key = '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'
+
+# Configure logging for this specific program
+logging.basicConfig(filename='another_program.log', level=logging.ERROR, format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
+logger = logging.getLogger('AnotherProgram')
 
 # Function to write a reply to a file
 def write_reply_to_file(reply, file_path):
     try:
+
         # Construct the full file path
         file_path = os.path.join("static", "download", file_path)
 
@@ -21,6 +27,10 @@ def write_reply_to_file(reply, file_path):
         new_sentence = 'import datetime'
         rewrite_file(file_path, new_sentence)
     except IOError as e:
+        logger.error(str(e))
+        print("An error occurred while writing to the file:", str(e))
+    except Exception as e:
+        logger.error(str(e))
         print("An error occurred while writing to the file:", str(e))
 
 # Function to rewrite a file with new content
@@ -43,6 +53,7 @@ def rewrite_file(filename, new_sentence):
             file.write(new_sentence + '\n')
             file.write(existing_content)
     except IOError as e:
+        logger.error(str(e))
         print("An error occurred while rewriting the file:", str(e))
 
 # Function to execute a Python script
@@ -56,6 +67,7 @@ def execute_python_script(script_path):
     except FileNotFoundError:
         print("Error: Python executable not found.")
     except Exception as e:
+        logger.error(str(e))
         print("An error occurred:", str(e))
 
 # Main wrapper function
@@ -83,6 +95,7 @@ def wrapper(content, filename, scriptname):
 
     except IndexError:
         print("Insufficient arguments. Please provide content, filename, and scriptname.")
+
 
 # Retrieve arguments and call the main wrapper function
 content = sys.argv[1] if len(sys.argv) > 1 else ""
