@@ -4,7 +4,7 @@ import sys
 import openai
 
 # Set the OpenAI API key
-openai.api_key = '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'
+openai.api_key = ''
 
 # Function to write a reply to a file
 def write_reply_to_file(reply, file_path):
